@@ -1,0 +1,32 @@
+# Audio
+ro.vendor.audio.clean_speaker=true
+ro.vendor.audio.feature.adapter=9
+ro.vendor.audio.karaoke.enable=true
+vendor.audio.timecheck_timeoutMs=10000
+
+# Display
+debug.sf.set_idle_timer_ms=1100
+vendor.display.force_tonemapping=1
+vendor.display.support_video_mode_30hz_aod=1
+
+# Radio
+persist.vendor.radio.dynamic_sar=1
+persist.vendor.radio.usb_config=diag,qdss,rmnet,adb
+
+# Sensors
+persist.vendor.sensors.debug.hal_trigger_ssr=true
+
+# Miscellaneous
+odm.xiaomi.security.hwc_not_cn=true
+odm.xiaomi.security.tee.rkp_only=true
+persist.sys.colorfullight.camera.support=1
+persist.sys.colorfullight.game.support=1
+persist.sys.colorfullight_type=1
+persist.vendor.low.cutoff=true
+remote_provisioning.hostname.cn=deviceapi.micloud.xiaomi.net/proxyGoogle
+ro.miui.audio.karaoke.suppot.lowlatency=true
+ro.odm.build.version.sdk_full=36.0
+ro.product.camera.livephoto.support=55
+ro.vendor.s2_reboot_time=12
+vendor.wv.oemcrypto.debug.enable_prov40=true
+
