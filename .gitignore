@@ -1,0 +1,11 @@
+# Graphify output
+graphify-out/
+
+# extract_utils (populated at sync time, not repo content)
+extract_utils/
+
+# Editor / OS junk
+.DS_Store
+*.swp
+*.swo
+*~
