@@ -2633,7 +2633,6 @@ vendor/etc/charger_fstab.qcom
 vendor/etc/clstc_config_library.xml
 vendor/etc/df_default.xml
 vendor/etc/excluded-input-devices.xml
-vendor/etc/fstab.qcom
 vendor/etc/ftm_test_config
 vendor/etc/ftm_test_config_malabar-qrd-snd-card
 vendor/etc/gpfspath_oem_config.xml
