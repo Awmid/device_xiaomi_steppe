@@ -1,6 +1,3 @@
-# Graphify output
-graphify-out/
-
 # extract_utils (populated at sync time, not repo content)
 extract_utils/
 
@@ -9,3 +6,5 @@ extract_utils/
 *.swp
 *.swo
 *~
+
+README-plan.txt
