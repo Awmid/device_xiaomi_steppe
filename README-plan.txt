@@ -22,6 +22,7 @@ Updated: 2026-11-11   Rule: update this file after every change (Claude and Ahma
    - [Step 5] VINTF manifests added to vintf/ (manifest_malabar.xml, 6 ODM SKU manifests, compatibility_matrix.xml); BoardConfig uppercase SKU loop; dropped duplicate fragments.
    - [Step 6] Cleanup: removed extract_utils/ from repo, fixed README.md SoC, added .gitignore.
    - [Step 7] Hardware info applied: androidboot.* props from ADB (usbcontroller, memcg, etc.), ro.sf.lcd_density=320, kryo300.
+   - [Step 8] Merge conflicts from branch rename/merge (main -> lineage-23.2-undone) resolved: restored full spring-style BoardConfig.mk, preserved generic_ramdisk/emulated_storage/launch_with_vendor_ramdisk in device.mk, cleaned conflict markers across README.md/BoardConfig.mk/device.mk, kept init.recovery.qcom.rc prebuilt in rootdir/Android.bp.
 (See detailed CHANGE LOG below for each step).
 
 == NEXT ==
@@ -29,7 +30,6 @@ Updated: 2026-11-11   Rule: update this file after every change (Claude and Ahma
 2. Build test: configure LineageOS build environment / local_manifests and run a test build (`mka recoveryimage` / `mka bootimage`).
 3. Audio / Display / Camera HAL verification: check if any blob shims or fixups (similar to Spring's extract-files.py) are needed for Android 16 / LineageOS 23.2.
 4. Kernel prebuilts repo: move prebuilts/ to a separate repository (e.g. `device_xiaomi_steppe-kernel`) later if keeping device tree lean.
-5. I had the "main" branch in the local github desktop with unchanged name so later when I switched to the current correct name lineage-23.2-undone and merged main it showed some conflicts, resolve them
 
 == OPEN QUESTIONS ==
 - Bootloader unlock eligibility (Mi account clock).
@@ -125,3 +125,11 @@ Updated: 2026-11-11   Rule: update this file after every change (Claude and Ahma
 - device.mk: added ro.sf.lcd_density=320 (verified from getprop ro.sf.lcd_density).
 - BoardConfig.mk: cleared cpu_variant TODO (ro.bionic.cpu_variant not set in stock;
   kryo300 confirmed correct for malabar).
+
+[Step 8 — Branch rename & merge conflict resolution]
+- Resolved git stash/merge conflict markers in BoardConfig.mk, device.mk, and README.md.
+- Restored BoardConfig.mk from d5c5e36 (full spring-style kernel/modules/bootconfig/ext4/AVB/VINTF layout).
+- In device.mk: retained Ahmad's generic_ramdisk, emulated_storage, and launch_with_vendor_ramdisk;
+  retained cleanup of legacy/miui rc files; kept ext4 postinstall, dalvik-heap, and density configs.
+- In lineage_steppe.mk: preserved core_64_bit_only.mk and model 26062RN92G.
+- In rootdir/Android.bp: retained init.recovery.qcom.rc prebuilt_etc definition.
