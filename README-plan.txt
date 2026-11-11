@@ -29,6 +29,7 @@ Updated: 2026-11-11   Rule: update this file after every change (Claude and Ahma
 2. Build test: configure LineageOS build environment / local_manifests and run a test build (`mka recoveryimage` / `mka bootimage`).
 3. Audio / Display / Camera HAL verification: check if any blob shims or fixups (similar to Spring's extract-files.py) are needed for Android 16 / LineageOS 23.2.
 4. Kernel prebuilts repo: move prebuilts/ to a separate repository (e.g. `device_xiaomi_steppe-kernel`) later if keeping device tree lean.
+5. I had the "main" branch in the local github desktop with unchanged name so later when I switched to the current correct name lineage-23.2-undone and merged main it showed some conflicts, resolve them
 
 == OPEN QUESTIONS ==
 - Bootloader unlock eligibility (Mi account clock).
