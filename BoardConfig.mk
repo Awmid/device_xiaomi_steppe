@@ -5,98 +5,158 @@
 
 DEVICE_PATH := device/xiaomi/steppe
 
+BUILD_BROKEN_ELF_PREBUILT_PRODUCT_COPY_FILES := true
+
 # A/B
 AB_OTA_UPDATER := true
-AB_OTA_PARTITIONS += \
-    system \
-    recovery \
-    product \
-    system_ext \
-    system_dlkm \
-    vendor \
-    odm \
+AB_OTA_PARTITIONS := \
     boot \
-    vendor_boot \
-    vendor_dlkm \
     dtbo \
-    init_boot
+    init_boot \
+    odm \
+    product \
+    recovery \
+    system \
+    system_dlkm \
+    system_ext \
+    vbmeta \
+    vbmeta_system \
+    vendor \
+    vendor_boot \
+    vendor_dlkm
 
-# Architecture
+# Architecture (64-bit only: ro.product.cpu.abilist=arm64-v8a)
 TARGET_ARCH := arm64
 TARGET_ARCH_VARIANT := armv8-a
 TARGET_CPU_ABI := arm64-v8a
-TARGET_CPU_ABI2 := 
 TARGET_CPU_VARIANT := generic
+# Verified: ro.bionic.cpu_variant not set in stock getprop; kryo300 is correct for malabar
 TARGET_CPU_VARIANT_RUNTIME := kryo300
 
 # Bootloader
-TARGET_BOOTLOADER_BOARD_NAME := malabar
+TARGET_BOOTLOADER_BOARD_NAME := steppe
 TARGET_NO_BOOTLOADER := true
+
+# Boot image (vendor_boot ramdisk is lz4, header v4)
+BOARD_RAMDISK_USE_LZ4 := true
+BOARD_BOOT_HEADER_VERSION := 4
+BOARD_INIT_BOOT_HEADER_VERSION := 4
+BOARD_MKBOOTIMG_ARGS := --header_version $(BOARD_BOOT_HEADER_VERSION)
+BOARD_MKBOOTIMG_INIT_ARGS += --header_version $(BOARD_INIT_BOOT_HEADER_VERSION)
+
+# Device trees
+BOARD_INCLUDE_DTB_IN_BOOTIMG := true
+TARGET_NEEDS_DTBOIMAGE := true
 
 # Display
 TARGET_USES_VULKAN := true
 
 # Kernel
-BOARD_BOOT_HEADER_VERSION := 4
-BOARD_INIT_BOOT_HEADER_VERSION := 4
 BOARD_KERNEL_BASE := 0x00000000
-BOARD_KERNEL_CMDLINE := video=vfb:640x400,bpp=32,memsize=3072000 nosoftlockup console=ttynull qcom_geni_serial.con_enabled=0 swinfo.fingerprint=steppe:16/OS3.0.313.0.WAVMIXM:user mtdoops.fingerprint=steppe:16/OS3.0.313.0.WAVMIXM:user erofs.reserved_pages=64 bootconfig
 BOARD_KERNEL_PAGESIZE := 4096
-BOARD_MKBOOTIMG_ARGS += --header_version $(BOARD_BOOT_HEADER_VERSION)
 BOARD_KERNEL_IMAGE_NAME := Image
-BOARD_INCLUDE_DTB_IN_BOOTIMG := true
-BOARD_KERNEL_SEPARATED_DTBO := true
-TARGET_KERNEL_CONFIG := generic_defconfig
-TARGET_KERNEL_SOURCE := kernel/xiaomi/steppe
 
-# Kernel - prebuilt
-TARGET_FORCE_PREBUILT_KERNEL := true
-ifeq ($(TARGET_FORCE_PREBUILT_KERNEL),true)
-TARGET_PREBUILT_KERNEL := $(DEVICE_PATH)/prebuilts/kernel
-TARGET_PREBUILT_DTB := $(DEVICE_PATH)/prebuilts/dtb.img
-BOARD_MKBOOTIMG_ARGS += --dtb $(TARGET_PREBUILT_DTB)
-BOARD_INCLUDE_DTB_IN_BOOTIMG := 
-BOARD_PREBUILT_DTBOIMAGE := $(DEVICE_PATH)/prebuilts/dtbo.img
-BOARD_KERNEL_SEPARATED_DTBO := 
-endif
+# Stock vendor_boot cmdline, minus the stale fingerprints
+BOARD_KERNEL_CMDLINE := \
+    video=vfb:640x400,bpp=32,memsize=3072000 \
+    nosoftlockup \
+    console=ttynull \
+    qcom_geni_serial.con_enabled=0 \
+    swinfo.fingerprint=$(LINEAGE_VERSION) \
+    mtdoops.fingerprint=$(LINEAGE_VERSION) \
+    erofs.reserved_pages=64 \
+    bootconfig
 
-# Partitions
+# Verified from `adb shell getprop` (ro.boot.*)
+BOARD_BOOTCONFIG := \
+    androidboot.hardware=qcom \
+    androidboot.usbcontroller=4e00000.dwc3 \
+    androidboot.memcg=1 \
+    androidboot.serialconsole=0 \
+    androidboot.load_modules_parallel=true
+
+# Kernel (prebuilt, layout mirrors spring-kernel)
+# TODO: run split_prebuilts.sh so dtbs/ and modules/* exist
+PREBUILT_PATH := $(DEVICE_PATH)/prebuilts
+TARGET_NO_KERNEL_OVERRIDE := true
+BOARD_PREBUILT_DTBIMAGE_DIR := $(PREBUILT_PATH)/dtbs/
+BOARD_PREBUILT_DTBOIMAGE := $(PREBUILT_PATH)/dtbo.img
+PRODUCT_COPY_FILES += \
+    $(PREBUILT_PATH)/kernel:kernel
+
+# Kernel modules
+GKI_VERSION := 6.12.69-android16-6-g0d80ee00f747-ab15461283-4k
+DLKM_MODULES_PATH := $(PREBUILT_PATH)/modules/vendor_dlkm
+RAMDISK_MODULES_PATH := $(PREBUILT_PATH)/modules/vendor_boot
+SYSTEM_DLKM_MODULES_PATH := $(PREBUILT_PATH)/modules/system_dlkm/$(GKI_VERSION)
+
+PRODUCT_COPY_FILES += \
+    $(call find-copy-subdir-files,*,$(SYSTEM_DLKM_MODULES_PATH)/,$(TARGET_COPY_OUT_SYSTEM_DLKM)/lib/modules/$(GKI_VERSION)/)
+
+BOARD_VENDOR_KERNEL_MODULES := $(wildcard $(DLKM_MODULES_PATH)/*.ko)
+BOARD_VENDOR_KERNEL_MODULES_LOAD := $(patsubst %,$(DLKM_MODULES_PATH)/%,$(shell cat $(DLKM_MODULES_PATH)/modules.load))
+BOARD_VENDOR_KERNEL_MODULES_BLOCKLIST_FILE := $(DLKM_MODULES_PATH)/modules.blocklist
+
+BOARD_VENDOR_RAMDISK_KERNEL_MODULES := $(wildcard $(RAMDISK_MODULES_PATH)/*.ko)
+BOARD_VENDOR_RAMDISK_KERNEL_MODULES_LOAD := $(patsubst %,$(RAMDISK_MODULES_PATH)/%,$(shell cat $(RAMDISK_MODULES_PATH)/modules.load))
+BOARD_VENDOR_RAMDISK_RECOVERY_KERNEL_MODULES_LOAD := $(patsubst %,$(RAMDISK_MODULES_PATH)/%,$(shell cat $(RAMDISK_MODULES_PATH)/modules.load.recovery))
+BOARD_VENDOR_RAMDISK_KERNEL_MODULES_BLOCKLIST_FILE := $(RAMDISK_MODULES_PATH)/modules.blocklist
+
+# Metadata
+BOARD_USES_METADATA_PARTITION := true
+
+# Partitions (sizes verified against `fastboot getvar all` and OTA payload)
+-include vendor/lineage/config/BoardConfigReservedSize.mk
+
 BOARD_FLASH_BLOCK_SIZE := 262144 # (BOARD_KERNEL_PAGESIZE * 64)
+
 BOARD_BOOTIMAGE_PARTITION_SIZE := 100663296
 BOARD_DTBOIMG_PARTITION_SIZE := 75497472
 BOARD_RECOVERYIMAGE_PARTITION_SIZE := 104857600
 BOARD_INIT_BOOT_IMAGE_PARTITION_SIZE := 8388608
 BOARD_VENDOR_BOOTIMAGE_PARTITION_SIZE := 100663296
+
 BOARD_SUPER_PARTITION_SIZE := 10200547328
-BOARD_SUPER_PARTITION_GROUPS := xiaomi_dynamic_partitions
-BOARD_XIAOMI_DYNAMIC_PARTITIONS_PARTITION_LIST := \
-    system \
-    product \
-    system_ext \
-    system_dlkm \
-    vendor \
-    odm \
-    vendor_dlkm
-BOARD_XIAOMI_DYNAMIC_PARTITIONS_SIZE := 10196353024
+BOARD_SUPER_PARTITION_GROUPS := qti_dynamic_partitions
+BOARD_QTI_DYNAMIC_PARTITIONS_PARTITION_LIST := odm product system system_dlkm system_ext vendor vendor_dlkm
+BOARD_QTI_DYNAMIC_PARTITIONS_SIZE := 10190061568 # from OTA payload (super - 10 MiB)
+
+BOARD_ODMIMAGE_FILE_SYSTEM_TYPE := ext4
+BOARD_PRODUCTIMAGE_FILE_SYSTEM_TYPE := ext4
+BOARD_SYSTEMIMAGE_FILE_SYSTEM_TYPE := ext4
+BOARD_SYSTEM_DLKMIMAGE_FILE_SYSTEM_TYPE := ext4
+BOARD_SYSTEM_EXTIMAGE_FILE_SYSTEM_TYPE := ext4
+BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE := ext4
+BOARD_VENDOR_DLKMIMAGE_FILE_SYSTEM_TYPE := ext4
+
+TARGET_COPY_OUT_ODM := odm
+TARGET_COPY_OUT_PRODUCT := product
+TARGET_COPY_OUT_SYSTEM := system
+TARGET_COPY_OUT_SYSTEM_DLKM := system_dlkm
+TARGET_COPY_OUT_SYSTEM_EXT := system_ext
+TARGET_COPY_OUT_VENDOR := vendor
+TARGET_COPY_OUT_VENDOR_DLKM := vendor_dlkm
 
 # Platform
+BOARD_USES_QCOM_HARDWARE := true
 TARGET_BOARD_PLATFORM := malabar
 
 # Properties
-TARGET_SYSTEM_PROP += $(DEVICE_PATH)/system.prop
-TARGET_VENDOR_PROP += $(DEVICE_PATH)/vendor.prop
-TARGET_PRODUCT_PROP += $(DEVICE_PATH)/product.prop
-TARGET_SYSTEM_EXT_PROP += $(DEVICE_PATH)/system_ext.prop
-TARGET_SYSTEM_DLKM_PROP += $(DEVICE_PATH)/system_dlkm.prop
-TARGET_ODM_PROP += $(DEVICE_PATH)/odm.prop
-TARGET_ODM_DLKM_PROP += $(DEVICE_PATH)/odm_dlkm.prop
-TARGET_VENDOR_DLKM_PROP += $(DEVICE_PATH)/vendor_dlkm.prop
+TARGET_ODM_PROP += $(DEVICE_PATH)/properties/odm.prop
+TARGET_PRODUCT_PROP += $(DEVICE_PATH)/properties/product.prop
+TARGET_SYSTEM_PROP += $(DEVICE_PATH)/properties/system.prop
+TARGET_SYSTEM_EXT_PROP += $(DEVICE_PATH)/properties/system_ext.prop
+TARGET_VENDOR_PROP += $(DEVICE_PATH)/properties/vendor.prop
 
 # Recovery
+BOARD_EXCLUDE_KERNEL_FROM_RECOVERY_IMAGE := true
 TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/rootdir/etc/fstab.qcom
 TARGET_RECOVERY_PIXEL_FORMAT := RGBX_8888
 TARGET_USERIMAGES_USE_EXT4 := true
 TARGET_USERIMAGES_USE_F2FS := true
+
+# Sepolicy
+include device/qcom/sepolicy_vndr/SEPolicy.mk
 
 # Security patch level
 VENDOR_SECURITY_PATCH := 2026-08-05
@@ -104,17 +164,31 @@ VENDOR_SECURITY_PATCH := 2026-08-05
 # Verified Boot
 BOARD_AVB_ENABLE := true
 BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --flags 3
+BOARD_MOVE_GSI_AVB_KEYS_TO_VENDOR_BOOT := true
+
 BOARD_AVB_RECOVERY_KEY_PATH := external/avb/test/data/testkey_rsa4096.pem
 BOARD_AVB_RECOVERY_ALGORITHM := SHA256_RSA4096
-BOARD_AVB_RECOVERY_ROLLBACK_INDEX := 1
+BOARD_AVB_RECOVERY_ROLLBACK_INDEX := $(PLATFORM_SECURITY_PATCH_TIMESTAMP)
 BOARD_AVB_RECOVERY_ROLLBACK_INDEX_LOCATION := 1
-BOARD_AVB_VENDOR_BOOT_KEY_PATH := external/avb/test/data/testkey_rsa4096.pem
-BOARD_AVB_VENDOR_BOOT_ALGORITHM := SHA256_RSA4096
-BOARD_AVB_VENDOR_BOOT_ROLLBACK_INDEX := 1
-BOARD_AVB_VENDOR_BOOT_ROLLBACK_INDEX_LOCATION := 1
+
+BOARD_AVB_VBMETA_SYSTEM := system system_ext product
+BOARD_AVB_VBMETA_SYSTEM_KEY_PATH := external/avb/test/data/testkey_rsa4096.pem
+BOARD_AVB_VBMETA_SYSTEM_ALGORITHM := SHA256_RSA4096
+BOARD_AVB_VBMETA_SYSTEM_ROLLBACK_INDEX := $(PLATFORM_SECURITY_PATCH_TIMESTAMP)
+BOARD_AVB_VBMETA_SYSTEM_ROLLBACK_INDEX_LOCATION := 2
+
+BOARD_AVB_BOOT_KEY_PATH := external/avb/test/data/testkey_rsa4096.pem
+BOARD_AVB_BOOT_ALGORITHM := SHA256_RSA4096
+BOARD_AVB_BOOT_ROLLBACK_INDEX := $(PLATFORM_SECURITY_PATCH_TIMESTAMP)
+BOARD_AVB_BOOT_ROLLBACK_INDEX_LOCATION := 3
 
 # VINTF
-DEVICE_MANIFEST_FILE += $(DEVICE_PATH)/manifest.xml
+DEVICE_MANIFEST_FILE += $(DEVICE_PATH)/vintf/vendor/manifest_malabar.xml
+DEVICE_FRAMEWORK_COMPATIBILITY_MATRIX_FILE += $(DEVICE_PATH)/vintf/compatibility_matrix.xml
+
+ODM_MANIFEST_SKUS := hcesim_dsds hcesim_ssss hcesimese_dsds hcesimese_ssss nonfc_dsds nonfc_ssss
+$(foreach sku,$(ODM_MANIFEST_SKUS), \
+    $(eval ODM_MANIFEST_$(call to-upper,$(sku))_FILES := $(DEVICE_PATH)/vintf/odm/manifest_$(sku).xml))
 
 # Inherit the proprietary files
 include vendor/xiaomi/steppe/BoardConfigVendor.mk
