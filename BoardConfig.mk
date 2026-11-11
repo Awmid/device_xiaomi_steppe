@@ -75,14 +75,15 @@ BOARD_BOOTCONFIG := \
     androidboot.serialconsole=0 \
     androidboot.load_modules_parallel=true
 
-# Kernel (prebuilt, layout mirrors spring-kernel)
-# TODO: run split_prebuilts.sh so dtbs/ and modules/* exist
-PREBUILT_PATH := $(DEVICE_PATH)/prebuilts
+# Kernel (prebuilt, lives in device/xiaomi/steppe-kernel = repo device_xiaomi_steppe_kernel;
+# layout mirrors spring-kernel)
+PREBUILT_PATH := device/xiaomi/steppe-kernel
 TARGET_NO_KERNEL_OVERRIDE := true
-BOARD_PREBUILT_DTBIMAGE_DIR := $(PREBUILT_PATH)/dtbs/
-BOARD_PREBUILT_DTBOIMAGE := $(PREBUILT_PATH)/dtbo.img
+TARGET_KERNEL_SOURCE := $(PREBUILT_PATH)/kernel-headers
+BOARD_PREBUILT_DTBIMAGE_DIR := $(PREBUILT_PATH)/images/dtbs/
+BOARD_PREBUILT_DTBOIMAGE := $(PREBUILT_PATH)/images/dtbo.img
 PRODUCT_COPY_FILES += \
-    $(PREBUILT_PATH)/kernel:kernel
+    $(PREBUILT_PATH)/images/kernel:kernel
 
 # Kernel modules
 GKI_VERSION := 6.12.69-android16-6-g0d80ee00f747-ab15461283-4k
