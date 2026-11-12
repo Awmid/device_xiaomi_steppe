@@ -17,7 +17,7 @@ from extract_utils.main import (
     ExtractUtilsModule,
 )
 
-# Modelled on spring's lineage-23.2 extract-files.py.
+# Modelled on spring's and peridot's lineage-23.2 extract-files.py.
 # Every fixup below was checked against the actual steppe dump (blob exists and
 # has the dependency the fixup targets), except the "unverified shim" group.
 namespace_imports = [
@@ -102,6 +102,33 @@ blob_fixups: blob_fixups_user_type = {
         .regex_replace('.*media_codecs_(google_audio|google_telephony|vendor_audio|google_c2|dolby_audio).*\n', ''),
     ('vendor/lib64/libqcrilNr.so', 'vendor/lib64/libril-db.so'): blob_fixup()
         .binary_regex_replace(rb'persist\.vendor\.radio\.poweron_opt', rb'persist.vendor.radio.poweron_ign'),
+    # --- from peridot (official lineage-23.2), each verified against the steppe dump ---
+    'system_ext/lib64/vendor.qti.hardware.qccsyshal@1.2-halimpl.so': blob_fixup()
+        .replace_needed('libprotobuf-cpp-full.so', 'libprotobuf-cpp-full-21.7.so'),
+    (
+        'vendor/lib64/libagm.so',
+        'vendor/lib64/libar-pal.so',
+        'vendor/lib64/libmcs.so',
+    ): blob_fixup()
+        .replace_needed('libaudioroute.so', 'libaudioroute-v34.so'),
+    # camera blobs link allocator V1, A16 only gets V2 (same blobs peridot patches)
+    (
+        'vendor/lib64/libcamximageformatutils.so',
+        'vendor/lib64/libchifeature2.so',
+        'vendor/lib64/camera/components/com.qti.node.dewarp.so',
+        'vendor/lib64/hw/com.qti.chi.offline.so',
+        'vendor/lib64/hw/com.qti.chi.override.so',
+        'vendor/lib64/vendor.qti.hardware.camera.postproc@1.0-service-impl.so',
+        'vendor/bin/chifeature2test',
+        'vendor/bin/chiofflinepostproctest',
+        'vendor/bin/f2player',
+    ): blob_fixup()
+        .replace_needed(
+            'android.hardware.graphics.allocator-V1-ndk.so',
+            'android.hardware.graphics.allocator-V2-ndk.so',
+        ),
+    'vendor/etc/seccomp_policy/c2audio.vendor.ext-arm64.policy': blob_fixup()
+        .add_line_if_missing('setsockopt: 1'),
 }  # fmt: skip
 
 
