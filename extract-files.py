@@ -35,15 +35,30 @@ def lib_fixup_vendor_suffix(lib: str, partition: str, *args, **kwargs):
     return f'{lib}_{partition}' if partition == 'vendor' else None
 
 
+def _libs_in_vendor_and_elsewhere():
+    # Soong rejects two modules with the same name, and the dump ships the same
+    # library in vendor/ and in system/system_ext/odm/product. Find every such
+    # library from proprietary-files.txt and give the vendor copy a _vendor suffix.
+    import os
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'proprietary-files.txt')
+    parts = {}
+    with open(path) as f:
+        for line in f:
+            line = line.strip().lstrip('-')
+            if not line or line.startswith('#'):
+                continue
+            blob = line.split(';')[0].split('|')[0]
+            if not blob.endswith('.so') or '/lib' not in blob:
+                continue
+            partition = blob.split('/')[0]
+            stem = os.path.basename(blob)[:-3]
+            parts.setdefault(stem, set()).add(partition)
+    return tuple(sorted(s for s, p in parts.items() if 'vendor' in p and len(p) > 1))
+
+
 lib_fixups: lib_fixups_user_type = {
     **lib_fixups,
-    (
-        # vendor.qti.diaghal@1.0 exists in both vendor and system_ext in the dump
-        'vendor.qti.diaghal@1.0',
-        'vendor.qti.hardware.wifidisplaysession@1.0',
-        'vendor.qti.imsrtpservice@3.0',
-        'vendor.qti.imsrtpservice@3.1',
-    ): lib_fixup_vendor_suffix,
+    _libs_in_vendor_and_elsewhere(): lib_fixup_vendor_suffix,
 }
 
 
