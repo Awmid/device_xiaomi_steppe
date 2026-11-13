@@ -5,7 +5,7 @@
 Feel free to PR/test if you can, that would be much appreciated
 
 ## Specifications
-* **SoC:** Qualcomm Snapdragon 4 Gen 5 (malabar / SM7635)
+* **SoC:** Qualcomm Snapdragon 4 Gen 5 (malabar / SM4850)
 * **Kernel:** 6.12.69 GKI (Android 16, 4K pages)
 
 ## Current Status

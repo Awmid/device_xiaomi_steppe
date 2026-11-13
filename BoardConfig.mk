@@ -33,6 +33,22 @@ TARGET_CPU_VARIANT := generic
 # Verified: ro.bionic.cpu_variant not set in stock getprop; kryo300 is correct for malabar
 TARGET_CPU_VARIANT_RUNTIME := kryo300
 
+# Audio
+$(call soong_config_set, android_hardware_audio, run_64bit, true)
+
+AUDIO_FEATURE_ENABLED_DTS_EAGLE := false
+AUDIO_FEATURE_ENABLED_GEF_SUPPORT := true
+AUDIO_FEATURE_ENABLED_HW_ACCELERATED_EFFECTS := false
+AUDIO_FEATURE_ENABLED_INSTANCE_ID := true
+AUDIO_FEATURE_ENABLED_PROXY_DEVICE := true
+
+TARGET_USES_QCOM_MM_AUDIO := true
+
+# Audio HAL, AGM and PAL come from the stock vendor blobs (AIDL pal/agm, libaudiocorehal.qti.so), not from source
+TARGET_PROVIDES_AUDIO_HAL := true
+TARGET_PROVIDES_LIBAGM := true
+TARGET_PROVIDES_LIBAR_PAL := true
+
 # Bootloader
 TARGET_BOOTLOADER_BOARD_NAME := steppe
 TARGET_NO_BOOTLOADER := true
@@ -142,6 +158,10 @@ TARGET_COPY_OUT_VENDOR_DLKM := vendor_dlkm
 BOARD_USES_QCOM_HARDWARE := true
 TARGET_BOARD_PLATFORM := malabar
 
+# malabar is part of the UM 6.6 family in our hardware/qcom-caf/common fork (resolves to the sm8750 HAL namespaces),
+# but the stock gralloc has no UBWCP support (no libubwcp), unlike the other 6.1/6.6 platforms
+TARGET_GRALLOC_HANDLE_HAS_UBWCP_FORMAT := false
+
 # Properties
 TARGET_ODM_PROP += $(DEVICE_PATH)/properties/odm.prop
 TARGET_PRODUCT_PROP += $(DEVICE_PATH)/properties/product.prop
@@ -157,6 +177,8 @@ TARGET_USERIMAGES_USE_EXT4 := true
 TARGET_USERIMAGES_USE_F2FS := true
 
 # Sepolicy
+# sm8750 sepolicy_vndr is keyed by platform dir; canoe is the newest one (6.12 generation, has the demura HAL like the stock vendor)
+TARGET_SEPOLICY_DIR := canoe
 include device/qcom/sepolicy_vndr/SEPolicy.mk
 
 # Security patch level
@@ -185,7 +207,13 @@ BOARD_AVB_BOOT_ROLLBACK_INDEX_LOCATION := 3
 
 # VINTF
 DEVICE_MANIFEST_FILE += $(DEVICE_PATH)/vintf/vendor/manifest_malabar.xml
-DEVICE_FRAMEWORK_COMPATIBILITY_MATRIX_FILE += $(DEVICE_PATH)/vintf/compatibility_matrix.xml
+
+# Stock vendor compatibility matrix (type="device")
+DEVICE_MATRIX_FILE := $(DEVICE_PATH)/vintf/compatibility_matrix.xml
+
+DEVICE_FRAMEWORK_COMPATIBILITY_MATRIX_FILE += \
+    hardware/qcom-caf/common/vendor_framework_compatibility_matrix.xml \
+    hardware/xiaomi/vintf/xiaomi_framework_compatibility_matrix.xml
 
 ODM_MANIFEST_SKUS := hcesim_dsds hcesim_ssss hcesimese_dsds hcesimese_ssss nonfc_dsds nonfc_ssss
 $(foreach sku,$(ODM_MANIFEST_SKUS), \
