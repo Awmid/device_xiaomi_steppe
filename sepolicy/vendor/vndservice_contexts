@@ -1,0 +1,5 @@
+vendor.qsap.mpamsvc                     u:object_r:vendor_qsap_mpamsvc_service:s0
+DisplayFeatureControl                          u:object_r:vendor_DisplayFeatureControl_service:s0
+display.mistcservice                           u:object_r:vendor_mistcdisplay_service:s0
+miclstcservice                                 u:object_r:vendor_miclstc_service:s0
+android.hardware.fingerprint.IGoodixFingerprintDaemon    u:object_r:goodix_fingerprint_vndservice:s0
