@@ -1,0 +1,9 @@
+interfaces.factoryInterface::IFactoryInterface  u:object_r:factory_interface_hwservice:s0
+interfaces.factoryInterface::IFactorySensor     u:object_r:factory_interface_hwservice:s0
+interfaces.factoryAta::IFactoryAta              u:object_r:factory_interface_hwservice:s0
+interfaces.customNvService::ICustomNv           u:object_r:factory_interface_hwservice:s0
+vendor.xiaomi.hardware.mimd::IMimd   u:object_r:hal_mimd_hwservice:s0
+vendor.xiaomi.hardware.mfidoca::IFidoService       u:object_r:hal_mfidoca_hwservice:s0
+vendor.tms.tmsnfc::ITmsNfc                                   u:object_r:tmsnfc_hwservice:s0
+vendor.tms.tmsese::ITmsEse                                   u:object_r:tmsese_hwservice:s0
+vendor.qti.diaghal::Idiag                          	     u:object_r:vendor_hal_diaghal_hwservice:s0

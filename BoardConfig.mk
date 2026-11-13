@@ -181,6 +181,9 @@ TARGET_USERIMAGES_USE_F2FS := true
 TARGET_SEPOLICY_DIR := canoe
 include device/qcom/sepolicy_vndr/SEPolicy.mk
 
+# Steppe/Xiaomi vendor policy that the qcom + Lineage policy does not define (generated from the stock vendor_sepolicy.cil, see tools/gen_sepolicy_from_cil.py)
+BOARD_VENDOR_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy/vendor
+
 # Security patch level
 VENDOR_SECURITY_PATCH := 2026-08-05
 
