@@ -1,0 +1,24 @@
+# Firmware partitions of steppe OS3.0.313.0.WAVMIXM (steppe_global-ota_full-OS3.0.313.0.WAVMIXM)
+# Names come from the OTA payload (dump all_files.txt temp_raw_images/). pvmfw, mi_ext and the boot/dtbo/vbmeta
+# images are not firmware. The images themselves are NOT in the dump yet: extract them from payload.bin into the
+# dump root, then set add_firmware_proprietary_file=True in extract-files.py and re-run it.
+
+abl.img;AB
+bluetooth.img;AB
+countrycode.img;AB
+devcfg.img;AB
+dsp.img;AB
+featenabler.img;AB
+hyp.img;AB
+idmanager.img;AB
+imagefv.img;AB
+keymaster.img;AB
+modem.img;AB
+multiimgoem.img;AB
+qupfw.img;AB
+rpm.img;AB
+secretkeeper.img;AB
+tz.img;AB
+uefisecapp.img;AB
+xbl.img;AB
+xbl_config.img;AB
