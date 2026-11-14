@@ -1,0 +1,247 @@
+(bootloader) token:VQEBIAEQCy4rJ0qdWDLGvIV-SRKpWwMGc3RlcHBlAgTdMa1R
+(bootloader) crc:1
+(bootloader) snapshot-update-status:none
+(bootloader) awu:yes
+(bootloader) security-patch-level:2026-08-05
+(bootloader) parallel-download-flash:yes
+(bootloader) hw-revision:10000
+(bootloader) unlocked:no
+(bootloader) off-mode-charge:1
+(bootloader) charger-screen-enabled:1
+(bootloader) battery-soc-ok:yes
+(bootloader) battery-voltage:4169
+(bootloader) version-baseband:
+(bootloader) version-bootloader:
+(bootloader) erase-block-size: 0x1000
+(bootloader) logical-block-size: 0x1000
+(bootloader) variant:SM4 UFS
+(bootloader) partition-type:persist:raw
+(bootloader) partition-size:persist: 0x2000000
+(bootloader) partition-type:fsc:raw
+(bootloader) partition-size:fsc: 0x20000
+(bootloader) partition-type:fsg:raw
+(bootloader) partition-size:fsg: 0xA00000
+(bootloader) partition-type:modemst2:raw
+(bootloader) partition-size:modemst2: 0x800000
+(bootloader) partition-type:modemst1:raw
+(bootloader) partition-size:modemst1: 0x800000
+(bootloader) partition-type:ALIGN_TO_128K_2:raw
+(bootloader) partition-size:ALIGN_TO_128K_2: 0x1A000
+(bootloader) partition-type:xbl_sc_logs:raw
+(bootloader) partition-size:xbl_sc_logs: 0x20000
+(bootloader) partition-type:xbl_sc_test_mode:raw
+(bootloader) partition-size:xbl_sc_test_mode: 0x10000
+(bootloader) partition-type:tzsc:raw
+(bootloader) partition-size:tzsc: 0x20000
+(bootloader) partition-type:catecontentfv:raw
+(bootloader) partition-size:catecontentfv: 0x100000
+(bootloader) partition-type:secdata:raw
+(bootloader) partition-size:secdata: 0x7000
+(bootloader) partition-type:uefivarstore:raw
+(bootloader) partition-size:uefivarstore: 0x80000
+(bootloader) partition-type:mdcompress:raw
+(bootloader) partition-size:mdcompress: 0x1400000
+(bootloader) partition-type:storsec:raw
+(bootloader) partition-size:storsec: 0x20000
+(bootloader) partition-type:cateloader:raw
+(bootloader) partition-size:cateloader: 0x200000
+(bootloader) partition-type:logfs:raw
+(bootloader) partition-size:logfs: 0x800000
+(bootloader) partition-type:limits:raw
+(bootloader) partition-size:limits: 0x1000
+(bootloader) partition-type:eud:raw
+(bootloader) partition-size:eud: 0x1000
+(bootloader) partition-type:dip:raw
+(bootloader) partition-size:dip: 0x100000
+(bootloader) partition-type:devinfo:raw
+(bootloader) partition-size:devinfo: 0x2000
+(bootloader) partition-type:secretkeeper_b:raw
+(bootloader) partition-size:secretkeeper_b: 0xA00000
+(bootloader) partition-type:pvmfw_b:raw
+(bootloader) partition-size:pvmfw_b: 0x100000
+(bootloader) partition-type:qweslicstore_b:raw
+(bootloader) partition-size:qweslicstore_b: 0x40000
+(bootloader) partition-type:vendor_boot_b:raw
+(bootloader) partition-size:vendor_boot_b: 0x6000000
+(bootloader) partition-type:recovery_b:raw
+(bootloader) partition-size:recovery_b: 0x6400000
+(bootloader) partition-type:init_boot_b:raw
+(bootloader) partition-size:init_boot_b: 0x800000
+(bootloader) partition-type:uefisecapp_b:raw
+(bootloader) partition-size:uefisecapp_b: 0x200000
+(bootloader) partition-type:imagefv_b:raw
+(bootloader) partition-size:imagefv_b: 0x3000000
+(bootloader) partition-type:featenabler_b:raw
+(bootloader) partition-size:featenabler_b: 0x20000
+(bootloader) partition-type:dtbo_b:raw
+(bootloader) partition-size:dtbo_b: 0x4800000
+(bootloader) partition-type:vbmeta_b:raw
+(bootloader) partition-size:vbmeta_b: 0x10000
+(bootloader) partition-type:qupfw_b:raw
+(bootloader) partition-size:qupfw_b: 0x14000
+(bootloader) partition-type:devcfg_b:raw
+(bootloader) partition-size:devcfg_b: 0x20000
+(bootloader) partition-type:boot_b:raw
+(bootloader) partition-size:boot_b: 0x6000000
+(bootloader) partition-type:keymaster_b:raw
+(bootloader) partition-size:keymaster_b: 0xA00000
+(bootloader) partition-type:dsp_b:raw
+(bootloader) partition-size:dsp_b: 0x4000000
+(bootloader) partition-type:abl_b:raw
+(bootloader) partition-size:abl_b: 0x100000
+(bootloader) partition-type:mdtp_b:raw
+(bootloader) partition-size:mdtp_b: 0x2000000
+(bootloader) partition-type:mdtpsecapp_b:raw
+(bootloader) partition-size:mdtpsecapp_b: 0x400000
+(bootloader) partition-type:bluetooth_b:raw
+(bootloader) partition-size:bluetooth_b: 0x400000
+(bootloader) partition-type:modem_b:raw
+(bootloader) partition-size:modem_b: 0x15E00000
+(bootloader) partition-type:hyp_b:raw
+(bootloader) partition-size:hyp_b: 0x800000
+(bootloader) partition-type:tz_b:raw
+(bootloader) partition-size:tz_b: 0x500000
+(bootloader) partition-type:idmanager_b:raw
+(bootloader) partition-size:idmanager_b: 0x80000
+(bootloader) partition-type:rpm_b:raw
+(bootloader) partition-size:rpm_b: 0x80000
+(bootloader) partition-type:secretkeeper_a:raw
+(bootloader) partition-size:secretkeeper_a: 0xA00000
+(bootloader) partition-type:pvmfw_a:raw
+(bootloader) partition-size:pvmfw_a: 0x100000
+(bootloader) partition-type:qweslicstore_a:raw
+(bootloader) partition-size:qweslicstore_a: 0x40000
+(bootloader) partition-type:qmcs:raw
+(bootloader) partition-size:qmcs: 0x1E00000
+(bootloader) partition-type:vendor_boot_a:raw
+(bootloader) partition-size:vendor_boot_a: 0x6000000
+(bootloader) partition-type:recovery_a:raw
+(bootloader) partition-size:recovery_a: 0x6400000
+(bootloader) partition-type:init_boot_a:raw
+(bootloader) partition-size:init_boot_a: 0x800000
+(bootloader) partition-type:questdatafv:raw
+(bootloader) partition-size:questdatafv: 0x1000000
+(bootloader) partition-type:featenabler_a:raw
+(bootloader) partition-size:featenabler_a: 0x20000
+(bootloader) partition-type:uefisecapp_a:raw
+(bootloader) partition-size:uefisecapp_a: 0x200000
+(bootloader) partition-type:imagefv_a:raw
+(bootloader) partition-size:imagefv_a: 0x3000000
+(bootloader) partition-type:dtbo_a:raw
+(bootloader) partition-size:dtbo_a: 0x4800000
+(bootloader) partition-type:vbmeta_a:raw
+(bootloader) partition-size:vbmeta_a: 0x10000
+(bootloader) partition-type:qupfw_a:raw
+(bootloader) partition-size:qupfw_a: 0x14000
+(bootloader) partition-type:devcfg_a:raw
+(bootloader) partition-size:devcfg_a: 0x20000
+(bootloader) partition-type:boot_a:raw
+(bootloader) partition-size:boot_a: 0x6000000
+(bootloader) partition-type:keymaster_a:raw
+(bootloader) partition-size:keymaster_a: 0xA00000
+(bootloader) partition-type:dsp_a:raw
+(bootloader) partition-size:dsp_a: 0x4000000
+(bootloader) partition-type:abl_a:raw
+(bootloader) partition-size:abl_a: 0x100000
+(bootloader) partition-type:mdtp_a:raw
+(bootloader) partition-size:mdtp_a: 0x2000000
+(bootloader) partition-type:mdtpsecapp_a:raw
+(bootloader) partition-size:mdtpsecapp_a: 0x400000
+(bootloader) partition-type:bluetooth_a:raw
+(bootloader) partition-size:bluetooth_a: 0x400000
+(bootloader) partition-type:modem_a:raw
+(bootloader) partition-size:modem_a: 0x15E00000
+(bootloader) partition-type:hyp_a:raw
+(bootloader) partition-size:hyp_a: 0x800000
+(bootloader) partition-type:tz_a:raw
+(bootloader) partition-size:tz_a: 0x500000
+(bootloader) partition-type:idmanager_a:raw
+(bootloader) partition-size:idmanager_a: 0x80000
+(bootloader) partition-type:rpm_a:raw
+(bootloader) partition-size:rpm_a: 0x80000
+(bootloader) partition-type:ddr:raw
+(bootloader) partition-size:ddr: 0x100000
+(bootloader) partition-type:cdt:raw
+(bootloader) partition-size:cdt: 0x20000
+(bootloader) partition-type:ALIGN_TO_128K_1:raw
+(bootloader) partition-size:ALIGN_TO_128K_1: 0x1A000
+(bootloader) partition-type:apdpb:raw
+(bootloader) partition-size:apdpb: 0x40000
+(bootloader) partition-type:multiimgoem_b:raw
+(bootloader) partition-size:multiimgoem_b: 0x8000
+(bootloader) partition-type:xbl_config_b:raw
+(bootloader) partition-size:xbl_config_b: 0x20000
+(bootloader) partition-type:xbl_b:raw
+(bootloader) partition-size:xbl_b: 0x400000
+(bootloader) partition-type:apdp:raw
+(bootloader) partition-size:apdp: 0x40000
+(bootloader) partition-type:multiimgoem_a:raw
+(bootloader) partition-size:multiimgoem_a: 0x8000
+(bootloader) partition-type:xbl_config_a:raw
+(bootloader) partition-size:xbl_config_a: 0x20000
+(bootloader) partition-type:xbl_a:raw
+(bootloader) partition-size:xbl_a: 0x400000
+(bootloader) partition-type:userdata:f2fs
+(bootloader) partition-size:userdata: 0x386CED3000
+(bootloader) partition-type:super:raw
+(bootloader) partition-size:super: 0x260000000
+(bootloader) partition-type:blackbox:raw
+(bootloader) partition-size:blackbox: 0xB400000
+(bootloader) partition-type:rescue:raw
+(bootloader) partition-size:rescue: 0x8000000
+(bootloader) partition-type:oops:raw
+(bootloader) partition-size:oops: 0x1000000
+(bootloader) partition-type:opcust:raw
+(bootloader) partition-size:opcust: 0x19000000
+(bootloader) partition-type:opconfig:raw
+(bootloader) partition-size:opconfig: 0x1400000
+(bootloader) partition-type:gsort:raw
+(bootloader) partition-size:gsort: 0x1000000
+(bootloader) partition-type:ffu:raw
+(bootloader) partition-size:ffu: 0x800000
+(bootloader) partition-type:mem:raw
+(bootloader) partition-size:mem: 0x800000
+(bootloader) partition-type:charger:raw
+(bootloader) partition-size:charger: 0x100000
+(bootloader) partition-type:metadata:f2fs
+(bootloader) partition-size:metadata: 0x4000000
+(bootloader) partition-type:rawdump:raw
+(bootloader) partition-size:rawdump: 0x12C00000
+(bootloader) partition-type:vbmeta_system_b:raw
+(bootloader) partition-size:vbmeta_system_b: 0x10000
+(bootloader) partition-type:vbmeta_system_a:raw
+(bootloader) partition-size:vbmeta_system_a: 0x10000
+(bootloader) partition-type:frp:raw
+(bootloader) partition-size:frp: 0x80000
+(bootloader) partition-type:keystore:raw
+(bootloader) partition-size:keystore: 0x80000
+(bootloader) partition-type:countrycode_b:raw
+(bootloader) partition-size:countrycode_b: 0x100000
+(bootloader) partition-type:countrycode_a:raw
+(bootloader) partition-size:countrycode_a: 0x100000
+(bootloader) partition-type:misc:raw
+(bootloader) partition-size:misc: 0x100000
+(bootloader) partition-type:ssd:raw
+(bootloader) partition-size:ssd: 0x2000
+(bootloader) has-slot:modem:yes
+(bootloader) has-slot:system:no
+(bootloader) current-slot:b
+(bootloader) has-slot:boot:yes
+(bootloader) slot-retry-count:b:6
+(bootloader) slot-unbootable:b:no
+(bootloader) slot-successful:b:yes
+(bootloader) slot-retry-count:a:6
+(bootloader) slot-unbootable:a:yes
+(bootloader) slot-successful:a:yes
+(bootloader) slot-count:2
+(bootloader) anti:1
+(bootloader) cpuid:0xdd31ad51
+(bootloader) dpstatus:0x20
+(bootloader) secure:yes
+(bootloader) serialno:dd31ad5138dd
+(bootloader) product:steppe
+(bootloader) is-userspace:no
+(bootloader) max-download-size:188743680
+(bootloader) kernel:uefi
+all: 
+Finished. Total time: 0.017s
