@@ -22,7 +22,8 @@ from extract_utils.main import (
 # has the dependency the fixup targets), except the "unverified shim" group.
 namespace_imports = [
     'device/xiaomi/steppe',
-    # TODO: add the hardware/qcom-caf/<platform> HAL namespace for malabar once chosen
+    # malabar resolves to the sm8750 HAL platform through our hardware/qcom-caf/common fork (UM_6_6_FAMILY)
+    'hardware/qcom-caf/sm8750',
     'hardware/qcom-caf/wlan',
     'hardware/xiaomi',
     'vendor/qcom/opensource/commonsys/display',
@@ -129,6 +130,12 @@ blob_fixups: blob_fixups_user_type = {
         ),
     'vendor/etc/seccomp_policy/c2audio.vendor.ext-arm64.policy': blob_fixup()
         .add_line_if_missing('setsockopt: 1'),
+    # Wi-Fi Display (same patches as peridot; both blobs link libgui/libinput/libbinder, verified in the dump)
+    'system_ext/lib64/libwfdmmsrc_system.so': blob_fixup()
+        .add_needed('libgui_shim.so'),
+    'system_ext/lib64/libwfdnative.so': blob_fixup()
+        .add_needed('libbinder_shim.so')
+        .add_needed('libinput_shim.so'),
 }  # fmt: skip
 
 
