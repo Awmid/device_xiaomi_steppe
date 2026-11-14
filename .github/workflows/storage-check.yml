@@ -1,0 +1,34 @@
+name: Check Runner Storage
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check-disk:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: 1. Check initial disk space
+        run: |
+          echo "=== INITIAL DISK SPACE ==="
+          df -h /
+
+      - name: 2. Check largest pre-installed directories
+        run: |
+          echo "=== TOP SPACE HOGS IN /usr AND /opt ==="
+          sudo du -sh /usr/share/* /usr/local/* /opt/* 2>/dev/null | sort -hr | head -n 20
+
+      - name: 3. Delete safe heavy packages
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf /usr/local/share/chromium
+          sudo apt-get clean
+          sudo docker system prune -af
+
+      - name: 4. Check disk space after cleanup
+        run: |
+          echo "=== DISK SPACE AFTER CLEANUP ==="
+          df -h /
