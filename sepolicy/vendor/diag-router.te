@@ -6,7 +6,7 @@ allow init vendor_diag-router:process transition;
 allow vendor_diag-router vendor_diag-router_exec:file { entrypoint execute getattr map open read };
 dontaudit init vendor_diag-router:process noatsecure;
 allow init vendor_diag-router:process { rlimitinh siginh };
-ifelse(target_build_variant, `user', `type_transition init vendor_diag-router_exec:process vendor_diag-router;')
+type_transition init vendor_diag-router_exec:process vendor_diag-router;
 allow vendor_diag-router vendor_sysfs_soc:dir { getattr ioctl lock open read search watch watch_reads };
 allow vendor_diag-router vendor_sysfs_soc:file { getattr ioctl lock map open read watch watch_reads };
 allow vendor_diag-router vendor_sysfs_soc:lnk_file { getattr ioctl lock map open read watch watch_reads };

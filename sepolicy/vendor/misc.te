@@ -2,8 +2,6 @@
 type vendor_avf_qcvm_manager_gunyah_cmafd;
 type vendor_trustedui_app_userfaultfd;
 allow virtualizationmanager vendor_avf_qcvm_manager_gunyah_cmafd:anon_inode { getattr read write };
-is_flag_enabled(RELEASE_AVF_ENABLE_EARLY_VM, `
 allow early_virtmgr vendor_avf_qcvm_manager_gunyah_cmafd:anon_inode { getattr read write };
-')
 allow crosvm vendor_avf_qcvm_manager_gunyah_cmafd:anon_inode { map read write };
 dontaudit su vendor_trustedui_app_userfaultfd:anon_inode { append audit_access create execmod execute getattr ioctl link lock map mounton open quotaon read relabelfrom relabelto rename setattr unlink watch watch_mount watch_reads watch_sb watch_with_perm write };

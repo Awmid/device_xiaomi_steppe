@@ -13,8 +13,7 @@ allow vendor_unsignedhexlpservice vendor_unsignedhexlp_data_file:file { append c
 allow vendor_unsignedhexlpservice dmabuf_system_heap_device:chr_file { getattr ioctl lock map open read watch watch_reads };
 allow vendor_unsignedhexlpservice vendor_dmabuf_system_heap_device:chr_file { getattr ioctl lock map open read watch watch_reads };
 allow vendor_unsignedhexlpservice vendor_synx_device:chr_file { append getattr ioctl lock map open read watch watch_reads write };
-# REMOVED: 'allow vendor_unsignedhexlpservice vendor_qdsp_device:chr_file { ioctl read };' violates the neverallow in qcom sepolicy_vndr generic/vendor/common/domain.te
-# (only a fixed list of DSP domains may touch vendor_qdsp_device). hexlp DSP access will be denied at runtime; add the domain to that exclusion list in a fork if needed.
+# pruned (neverallow): allow vendor_unsignedhexlpservice vendor_qdsp_device:chr_file { ioctl read };
 allow vendor_unsignedhexlpservice sysfs:dir { getattr ioctl lock open read search watch watch_reads };
 allow vendor_unsignedhexlpservice boot_status_prop:file { getattr map open read };
 allow vendor_unsignedhexlpservice vendor_adsprpc_prop:file { getattr map open read };

@@ -1,0 +1,3 @@
+# Rules removed from the generated policy because they violate a neverallow of the included policy sources.
+# Written by tools/regen_sepolicy.py
+unsignedhexlpservice.te: allow vendor_unsignedhexlpservice vendor_qdsp_device:chr_file { ioctl read };  ==>  (removed)

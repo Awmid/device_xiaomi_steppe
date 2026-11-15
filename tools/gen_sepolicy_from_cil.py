@@ -9,6 +9,12 @@
 #   - file_contexts, property_contexts, service_contexts, hwservice_contexts, vndservice_contexts,
 #     seapp_contexts, keystore2_key_contexts and genfs_contexts entries that label a missing type
 #
+# v2: when SEPOLICY_BASE_CONFS=<dir> is set (dir with user_true/, userdebug_true/, user_false/ policy.conf files produced by
+# tools/check_sepolicy.py --base, see tools/regen_sepolicy.py) "already defined" is taken from the m4-EXPANDED base policy instead of
+# regexes over .te files. That fixes: macro-declared types (userfaultfd_use & co), Lineage m4 renames (sysfs_graphics=vendor_sysfs_graphics ...),
+# types that only exist in userdebug/eng (qcom test policy: declaration emitted as user-only), types that only exist when
+# RELEASE_AVF_ENABLE_EARLY_VM is on (rules wrapped in is_flag_enabled), and genfs/type_transition entries that already exist.
+#
 # Usage: gen_sepolicy_from_cil.py <dump_root> <sepolicy_vndr_dir> <aosp_system_sepolicy> <qssi_sepolicy> <lineage_sepolicy> <out_dir>
 import os
 import re
@@ -17,6 +23,16 @@ import collections
 
 VER = "_202504"
 dump, vndr, syssep, qssisep, linsep, out = sys.argv[1:7]
+CONF_DIR = os.environ.get("SEPOLICY_BASE_CONFS")
+FLAG = "RELEASE_AVF_ENABLE_EARLY_VM"
+# device/lineage/sepolicy/qcom/sepolicy.mk BOARD_SEPOLICY_M4DEFS (applied by the real build to every .te token)
+RENAME = dict(kv.split("=") for kv in (
+    "custom_ab_block_device=vendor_custom_ab_block_device display_vendor_data_file=vendor_display_vendor_data_file "
+    "hal_gnss_qti=vendor_hal_gnss_qti hal_perf_default=vendor_hal_perf_default location_domain=vendor_location "
+    "persist_block_device=vendor_persist_block_device qdisplay_service=vendor_qdisplay_service "
+    "sysfs_battery_supply=vendor_sysfs_battery_supply sysfs_devfreq=vendor_sysfs_devfreq sysfs_graphics=vendor_sysfs_graphics "
+    "sysfs_kgsl=vendor_sysfs_kgsl sysfs_scsi_host=vendor_sysfs_scsi_host sysfs_socinfo_sensitive=vendor_sysfs_soc_sensitive "
+    "sysfs_usb_supply=vendor_sysfs_usb_supply").split())
 
 
 # ---------------------------------------------------------------- cil parsing
@@ -130,8 +146,44 @@ for root in [syssep, qssisep, linsep] + VNDR_DIRS:
     known |= t | a
 
 
+dbg_only, flag_only = set(), set()
+base_tt, base_genfs = set(), set()
+if CONF_DIR:
+    def declared(path):
+        names = set()
+        for line in open(path, errors="replace"):
+            m = re.match(r"\s*(?:type|attribute)\s+([A-Za-z0-9_.-]+)\s*[,;]", line)
+            if m:
+                names.add(m.group(1))
+            m = re.match(r"\s*typealias\s+\S+\s+alias\s+([A-Za-z0-9_.-]+)\s*;", line)
+            if m:
+                names.add(m.group(1))
+        return names
+    kn_user = declared(CONF_DIR + "/user_true/policy.conf")
+    kn_dbg = declared(CONF_DIR + "/userdebug_true/policy.conf")
+    kn_nof = declared(CONF_DIR + "/user_false/policy.conf")
+    dbg_only = kn_dbg - kn_user          # exist only in userdebug/eng builds
+    flag_only = kn_user - kn_nof         # exist only with RELEASE_AVF_ENABLE_EARLY_VM
+    known = (kn_user & kn_dbg) | flag_only
+    print("known (expanded base policy): %d | userdebug-only: %d | flag-only: %d %s" % (
+        len(known), len(dbg_only), len(flag_only), sorted(flag_only)[:6]))
+    for line in open(CONF_DIR + "/user_true/policy.conf", errors="replace"):
+        m = re.match(r"genfscon (\S+) (\S+) ", line)
+        if m:
+            base_genfs.add((m.group(1), m.group(2) if m.group(2).startswith("/") else "/" + m.group(2)))
+        m = re.match(r"type_transition (\S+|\{[^}]*\}) (\S+|\{[^}]*\}):(\S+) (\S+)(?: (\S+))?;", line)
+        if m:
+            base_tt.add((frozenset(re.findall(r"[\w.-]+", m.group(1))), frozenset(re.findall(r"[\w.-]+", m.group(2))),
+                         m.group(3), m.group(4), m.group(5)))
+
+
 def norm_name(n):
     return n[:-len(VER)] if n.endswith(VER) else n
+
+
+def eff(n):
+    """name as it exists after the build's m4 renames"""
+    return RENAME.get(n, n)
 
 
 def is_typeattr(n):
@@ -165,8 +217,8 @@ def build_complex():
 
 
 build_complex()
-new_types = {norm_name(t) for t in stock_types if not is_typeattr(t)} - known
-new_attrs = {norm_name(a) for a in stock_attrs if not is_typeattr(a)} - known - new_types
+new_types = {norm_name(t) for t in stock_types if not is_typeattr(t) and eff(norm_name(t)) not in known}
+new_attrs = {norm_name(a) for a in stock_attrs if not is_typeattr(a) and eff(norm_name(a)) not in known} - new_types
 new_all = new_types | new_attrs
 print("new types: %d, new attributes: %d" % (len(new_types), len(new_attrs)))
 
@@ -275,7 +327,7 @@ for st in cil:
             name = st[4] if len(st) == 6 else None
             S, T = expand(s), expand(t)
             nn = norm_name(new)
-            if (S | T | {nn}) & new_all:
+            if (S | T | {nn}) & new_all and (frozenset(S), frozenset(T), fmt_set(flatten_perms(cls)), nn, name) not in base_tt:
                 cl = fmt_set(flatten_perms(cls))
                 nm = (" " + name) if name else ""
                 rules.append((sorted((S | T | {nn}) & new_all)[0],
@@ -285,11 +337,16 @@ for st in cil:
 
 # genfscon
 genfs = []
+genfs_dup = []
 for st in cil:
     if st and st[0] == "genfscon" and len(st) == 4:
         ctx = st[3]
         if isinstance(ctx, list) and len(ctx) >= 3 and norm_name(ctx[2]) in new_all:
-            genfs.append("genfscon %s %s u:object_r:%s:s0" % (st[1], st[2].strip('"'), norm_name(ctx[2])))
+            gp = st[2].strip('"')
+            if (st[1], gp if gp.startswith("/") else "/" + gp) in base_genfs:
+                genfs_dup.append((st[1], gp, norm_name(ctx[2])))
+                continue
+            genfs.append("genfscon %s %s u:object_r:%s:s0" % (st[1], gp, norm_name(ctx[2])))
 print("rules touching new types: %d, genfs: %d, skipped: %s" % (len(rules), len(genfs), dict(skipped)))
 
 
@@ -330,7 +387,10 @@ for f in os.listdir(out):
 with open(out + "/attributes", "w") as fh:
     fh.write("# Generated by tools/gen_sepolicy_from_cil.py from the stock vendor_sepolicy.cil. Do not edit by hand.\n")
     for a in sorted(new_attrs):
-        fh.write("attribute %s;\n" % a)
+        line = "attribute %s;" % a
+        if a in dbg_only:
+            line = "ifelse(target_build_variant, `user', `%s')" % line
+        fh.write(line + "\n")
 
 buckets = collections.defaultdict(list)
 dropped_attrs = collections.defaultdict(list)
@@ -343,6 +403,8 @@ for t in sorted(new_types):
     decl = "type %s%s;" % (t, ", " + ", ".join(attrs) if attrs else "")
     if t in permissive:
         decl += "\npermissive %s;" % t
+    if t in dbg_only:   # qcom test policy declares it in userdebug/eng
+        decl = "ifelse(target_build_variant, `user', `" + decl.replace("\n", " ") + "')"
     if k == "property":
         buckets["property.te"].append(decl)
     elif k == "service":
@@ -352,7 +414,10 @@ for t in sorted(new_types):
     else:
         buckets[family(t) + ".te"].append(decl)
 
+_flag_re = re.compile(r"[A-Za-z0-9_.-]+")
 for owner, txt in rules:
+    if flag_only and any(tok in flag_only for tok in _flag_re.findall(txt)):
+        txt = "is_flag_enabled(%s, `%s')" % (FLAG, txt)
     k = kind_of(owner, owner in new_attrs)
     if k == "property":
         fn = "property.te"
@@ -452,6 +517,7 @@ with open("/tmp/sepolicy_gen_report.txt", "w") as fh:
     fh.write("complex attribute sets (not expanded): %s\n" % sorted(complex_sets)[:50])
     fh.write("skipped: %s\n" % dict(skipped))
     fh.write("attributes dropped from type declarations (not defined by any included policy, belong to the stock system_ext/product policy): %s\n" % dict(dropped_attrs))
+    fh.write("genfs entries skipped because the base policy already labels them: %s\n" % genfs_dup)
     fh.write("\nCONTEXT CONFLICTS (same name already labeled by an included policy source, ours dropped):\n")
     for c in conflicts:
         fh.write("  %s\n    stock : %s\n    source: %s\n" % c)

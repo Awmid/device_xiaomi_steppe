@@ -28,8 +28,8 @@ type tmsnfc_hwservice, hwservice_manager_type;
 type vendor_DisplayFeatureControl_service, vndservice_manager_type;
 type vendor_hal_avf_qcvm_service, hal_service_type, protected_service, service_manager_type;
 type vendor_hal_citsensorservice_xiaomi_service, hal_service_type, protected_service, service_manager_type;
-ifelse(target_build_variant, `user', `type vendor_hal_diaghal_hwservice, hwservice_manager_type, protected_hwservice;')  # declared by qcom test policy in userdebug/eng
-ifelse(target_build_variant, `user', `type vendor_hal_diaghal_service, hal_service_type, protected_service, service_manager_type;')  # declared by qcom test policy in userdebug/eng
+ifelse(target_build_variant, `user', `type vendor_hal_diaghal_hwservice, hwservice_manager_type, protected_hwservice;')
+ifelse(target_build_variant, `user', `type vendor_hal_diaghal_service, hal_service_type, protected_service, service_manager_type;')
 type vendor_hal_displayfeature_xiaomi_service, protected_service, service_manager_type;
 type vendor_hal_factory_interface_service, hal_service_type, protected_service, service_manager_type;
 type vendor_hal_fingerprint_hwservice_xiaomi, hal_service_type, service_manager_type;
