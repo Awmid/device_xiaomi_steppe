@@ -8,15 +8,19 @@
 3. compiles with our output for the 4 combinations; every neverallow violation reported by checkpolicy is pruned from the
    generated .te files (the rule, or just the offending source/target/perms of a set rule) and listed in sepolicy/vendor/../neverallow_pruned.txt
 Anything else that fails is printed and left alone.
+Exit code: 0 only if all 4 combinations compile in one clean round and no unexpected type had to be auto-declared;
+1 = not all combinations passed after 8 rounds; 3 = unexpected auto-declared type (see sepolicy/autodeclared_review.txt).
+Every pruned rule and every workaround of check_sepolicy.py is written to sepolicy/neverallow_pruned.txt and sepolicy/autodeclared_review.txt: REVIEW THEM.
 """
 import os, re, subprocess, sys, glob
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DEV = os.path.dirname(HERE)
-R = "/mnt/data/Documents/GitHub"
-TREE = f"{R}/my own device tree repos (steppe)"
-DUMP = f"{R}/dumped recovery ROM of my device, android 16/steppe_global-ota_full-OS3.0.313.0.WAVMIXM-user-16.0-ec59f294cf"
-REF = f"{R}/reference lineage-23.2 sepolicy"
+# Layout (override with env vars): <TREE> holds this repo and android_device_qcom_sepolicy_vndr side by side;
+# STEPPE_REF = dir with syssep/ qssisep/ linsep/ (lineage-23.2 clones); STEPPE_DUMP = unpacked stock OTA dump (REQUIRED).
+TREE = os.environ.get("STEPPE_TREE", os.path.dirname(DEV))
+DUMP = os.environ.get("STEPPE_DUMP") or sys.exit("set STEPPE_DUMP to the unpacked stock OTA dump directory")
+REF = os.environ.get("STEPPE_REF", os.path.join(os.path.dirname(TREE), "reference lineage-23.2 sepolicy"))
 OUT = f"{DEV}/sepolicy/vendor"
 work = os.path.expanduser(sys.argv[sys.argv.index("--work") + 1]) if "--work" in sys.argv else os.path.expanduser("~/sepol_out")
 COMBOS = [("user", "true"), ("userdebug", "true"), ("user", "false"), ("userdebug", "false")]
@@ -87,10 +91,20 @@ def prune(src, tgt, cls, perms):
     return hit
 
 
+AUTODECL = re.compile(r"auto-declared \(REAL if not AOSP-owned\): \[([^\]]*)\]")
+CAPS = re.compile(r"policycaps stripped: \[([^\]]*)\]")
+NLMSG = re.compile(r"nlmsg xperm rules stripped: (\d+)")
+quoted = lambda m: re.findall(r"'([^']+)'", m.group(1)) if m else []
+# early_virtmgr: AOSP policy references it even when RELEASE_AVF_ENABLE_EARLY_VM is false (same with --base), so the stub is not ours.
+KNOWN_AOSP_STUBS = {"early_virtmgr"}
+review = {}
+passed = False
 for rnd in range(8):
     bad = False
     for v, a in COMBOS:
         o = run_check(v, a, f"{work}/ours/{v}_{a}")
+        nl = NLMSG.search(o)
+        review[(v, a)] = (quoted(AUTODECL.search(o)), quoted(CAPS.search(o)), nl.group(1) if nl else "?")
         if "checkpolicy rc 0" in o:
             print(f"round {rnd}: {v}/{a}: OK")
             continue
@@ -106,12 +120,27 @@ for rnd in range(8):
         else:
             bad = True   # re-run all combos after a prune
     if not bad:
+        passed = True
         break
 
-if pruned:
-    open(f"{DEV}/sepolicy/neverallow_pruned.txt", "w").write(
-        "# Rules removed from the generated policy because they violate a neverallow of the included policy sources.\n"
-        "# Written by tools/regen_sepolicy.py\n" + "\n".join(pruned) + "\n")
+with open(f"{DEV}/sepolicy/neverallow_pruned.txt", "w") as f:
+    f.write("# Rules removed from the generated policy because they violate a neverallow of the included policy sources.\n"
+            "# Removing a rule makes the policy compile; it does NOT mean the service works without it. Review each one.\n"
+            "# Written by tools/regen_sepolicy.py\n" + ("\n".join(pruned) if pruned else "(none)") + "\n")
+with open(f"{DEV}/sepolicy/autodeclared_review.txt", "w") as f:
+    f.write("# Workarounds applied by tools/check_sepolicy.py to get the LOCAL compile through (nothing here is in the real policy).\n"
+            "# A type listed under auto-declared was missing everywhere and got a stub declaration; if it is not AOSP-owned, the real build will fail on it.\n"
+            "# Written by tools/regen_sepolicy.py\n")
+    for (v, a), (decl, caps, nl) in review.items():
+        f.write(f"{v}/avf={a}: auto-declared types={decl or 'none'} | policycaps stripped={caps or 'none'} | nlmsg xperm rules stripped={nl}\n")
+unexpected = sorted({t for d, _, _ in review.values() for t in d} - KNOWN_AOSP_STUBS)
 print("pruned rules:", len(pruned))
-for p in pruned:
-    print("  ", p[:200])
+for p_ in pruned:
+    print("  ", p_[:200])
+print("auto-declared (all combos):", sorted({t for d, _, _ in review.values() for t in d}) or "none", "| unexpected:", unexpected or "none")
+if not passed:
+    sys.exit("FAILED: not all 4 combinations compiled in one clean round after 8 rounds - the sepolicy is NOT verified")
+if unexpected:
+    print("FAILED: unexpected auto-declared types (see sepolicy/autodeclared_review.txt)")
+    sys.exit(3)
+print("OK: 4/4 combinations compile; review sepolicy/neverallow_pruned.txt and sepolicy/autodeclared_review.txt")

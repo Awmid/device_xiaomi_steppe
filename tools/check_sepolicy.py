@@ -10,12 +10,14 @@ Setup once:  mkdir -p ~/.cache/seltools && cd ~/.cache/seltools && apt-get downl
 """
 import os, re, sys, glob, subprocess
 
-R = "/mnt/data/Documents/GitHub"
-REF = f"{R}/reference lineage-23.2 sepolicy"
-TREE = f"{R}/my own device tree repos (steppe)"
+HERE = os.path.dirname(os.path.abspath(__file__))
+# Layout (override with env vars): <TREE>/device_xiaomi_steppe (this repo) and <TREE>/android_device_qcom_sepolicy_vndr side by side;
+# <REF>/{syssep,qssisep,linsep} = lineage-23.2 clones of android_system_sepolicy, device_qcom_sepolicy, device_lineage_sepolicy.
+TREE = os.environ.get("STEPPE_TREE", os.path.dirname(os.path.dirname(HERE)))
+REF = os.environ.get("STEPPE_REF", os.path.join(os.path.dirname(TREE), "reference lineage-23.2 sepolicy"))
 SYS, QSSI, LIN = f"{REF}/syssep", f"{REF}/qssisep", f"{REF}/linsep"
 VNDR = f"{TREE}/android_device_qcom_sepolicy_vndr"
-OURS = f"{TREE}/device_xiaomi_steppe/sepolicy/vendor"
+OURS = os.path.join(os.path.dirname(HERE), "sepolicy", "vendor")
 TOOLS = os.path.expanduser("~/.cache/seltools/root/usr/bin")
 variant = os.environ.get("VARIANT", "user")
 avf = os.environ.get("AVF", "true")
@@ -70,7 +72,7 @@ if r.returncode:
 
 conf = r.stdout
 # --- workarounds for the old checkpolicy / missing repos (check-only, nothing is written back to the tree) ---
-conf = re.sub(r"(?m)^(genfscon \w+ )([^/\s])", r"\1/\2", conf)   # qcom canoe genfs path without leading slash
+conf, ngenfs = re.subn(r"(?m)^(genfscon \w+ )([^/\s])", r"\1/\2", conf)   # qcom canoe genfs path without leading slash
 conf, nn = re.subn(r"\b(?:neverallowxperm|auditallowxperm|allowxperm|dontauditxperm)\b[^;]*?\bnlmsg\b[^;]*;", "", conf, flags=re.S)
 removed_caps, declared, dropped = [], [], []
 for _ in range(400):
@@ -90,5 +92,7 @@ for _ in range(400):
     break
 open(f"{out}/checkpolicy.err", "w").write(msg)
 print("unsupported policycaps stripped:", removed_caps, "| unknown types auto-declared (REAL if not AOSP-owned):", declared)
+print("nlmsg xperm rules stripped:", nn, "| genfs paths patched:", ngenfs)
 print("checkpolicy rc", c.returncode)
 print(msg[:4000])
+sys.exit(0 if c.returncode == 0 else 1)

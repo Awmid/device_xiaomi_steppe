@@ -41,7 +41,7 @@ Lineage 23.2 ships no qcom-caf platform for `malabar`. The forked `hardware_qcom
 - BoardConfig and `device.mk` structure, EROFS filesystems and fstab aligned with stock, AVB structure and rollback indexes pinned to stock values.
 - Blob extraction (`extract-files.py`, `proprietary-files.txt`) with shims and fixups. The vendor `Android.bp` has no duplicate module names.
 - VINTF manifests, SKU manifests and the device compatibility matrix from stock. Framework matrices checked by HAL name.
-- Device sepolicy generated from the stock compiled vendor policy (`tools/regen_sepolicy.py`). It compiles locally in 4 variant combinations, including neverallow checks.
+- Device sepolicy generated from the stock compiled vendor policy (`tools/regen_sepolicy.py`). It compiles in a local approximation of the real build (one monolithic policy, workarounds recorded in `sepolicy/autodeclared_review.txt`, neverallow-pruned rules in `sepolicy/neverallow_pruned.txt`); the real split platform/vendor build is the authority.
 - `recovery` is deliberately **not** in `AB_OTA_PARTITIONS`, and firmware images are kept out of the OTA lists.
 - Makefile reference audit: 1158 paths checked, 0 missing in the three repos.
 
@@ -60,7 +60,7 @@ Lineage 23.2 ships no qcom-caf platform for `malabar`. The forked `hardware_qcom
 - **AVB chain key:** after a build, check that the built `vbmeta.img` shows the stock chained key (sha1 starts `85f7b343fdc4`). Vbmeta is built with verification disabled (`--flags 3`) and test keys on purpose.
 - **Ignored scripts:** a few stock scripts are not called by any rc file (dead but harmless). Do not delete them.
 - **SD slot:** the stock fstab has an `sdcard1` entry that is not in this tree. Confirm the device has no SD slot.
-- **Credits:** `LICENSE`, copyright headers and a credits list for the reference trees still need to be written.
+- **Credits:** `LICENSE` is Apache 2.0. Per-file copyright headers and a credits list for the reference trees (Xiaomi `spring` and `peridot`) still need to be written.
 
 ## Before any test boot
 
@@ -83,7 +83,7 @@ A free build service is no longer available, so the first-build route is undecid
 - `tools/gen_sepolicy_from_cil.py` and `tools/regen_sepolicy.py` regenerate `sepolicy/vendor` from the stock compiled policy. Use these and not older copies.
 - `tools/check_sepolicy.py` builds a monolithic policy and runs `checkpolicy` with neverallow enforcement (needs `m4` and `checkpolicy`).
 - `extract-files.py` re-extracts the blobs from a stock dump.
-- `README-plan.txt` is the detailed step history and the do-not-redo list. Read it before changing anything in this tree.
+- Detailed development notes are kept outside this repository.
 
 ## Rules for contributors
 
