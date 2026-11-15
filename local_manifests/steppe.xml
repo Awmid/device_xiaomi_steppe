@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Local manifest for Xiaomi steppe (Redmi 17 5G) - LineageOS 23.2 (Android 16)
+
+  Install (inside your ROM source root, after `repo init -b lineage-23.2`). This file lives in the device tree repo, which repo
+  cannot read before the first sync, so fetch it directly:
+    mkdir -p .repo/local_manifests
+    curl -L -o .repo/local_manifests/steppe.xml \
+      https://raw.githubusercontent.com/Awmid/device_xiaomi_steppe/lineage-23.2-undone/local_manifests/steppe.xml
+    repo sync -c -j8   (add the no-clone-bundle and no-tags flags if you like)
+
+  Paths must match what the tree expects:
+    device/xiaomi/steppe         (lineage_steppe.mk, extract-files.py)
+    device/xiaomi/steppe-kernel  (BoardConfig.mk: PREBUILT_PATH)
+    vendor/xiaomi/steppe         (device.mk / BoardConfig.mk include vendor makefiles)
+-->
+<manifest>
+  <remote name="awmid" fetch="https://github.com/Awmid" />
+
+  <project path="device/xiaomi/steppe"
+           name="device_xiaomi_steppe"
+           remote="awmid"
+           revision="lineage-23.2-undone" />
+
+  <project path="device/xiaomi/steppe-kernel"
+           name="device_xiaomi_steppe_kernel"
+           remote="awmid"
+           revision="main" />
+
+  <project path="vendor/xiaomi/steppe"
+           name="vendor_xiaomi_steppe"
+           remote="awmid"
+           revision="main" />
+
+  <!-- hardware/xiaomi is NOT in the LineageOS default manifest; official Xiaomi trees pull it through
+       lineage.dependencies (e.g. device/xiaomi/peridot). Provides the xiaomi framework compatibility matrix
+       and the xiaomi AIDL interface modules the blobs link against. remote "github" = LineageOS, branch from <default>. -->
+  <project path="hardware/xiaomi"
+           name="LineageOS/android_hardware_xiaomi"
+           remote="github" />
+
+  <!--
+    Already in the LineageOS 23.2 default manifest (no entry needed): hardware/lineage/compat (all *_shim modules,
+    libtinyxml2-v34, libaudioroute-v34, libprotobuf-cpp-full-21.7), tools/extract-utils, prebuilts/extract-tools,
+    hardware/qcom-caf/wlan, vendor/qcom/opensource/{display,dataservices,commonsys*}.
+  -->
+
+  <!-- qcom-caf platform selection. Lineage 23.2 has no HAL platform for malabar and hardware/qcom-caf/common maps
+       TARGET_BOARD_PLATFORM to a "UM family". The fork below only adds malabar to UM_6_6_FAMILY (qcom_defs.mk) and
+       QCOM_BOARD_PLATFORMS (qcom_boards.mk), so malabar resolves to the sm8750 HAL/sepolicy_vndr/dataipa namespaces.
+       It replaces the default project and must repeat its linkfiles (kept identical to snippets/lineage.xml, lineage-23.2). -->
+  <remove-project name="LineageOS/android_hardware_qcom-caf_common" />
+  <project path="hardware/qcom-caf/common"
+           name="hardware_qcom-caf_common"
+           remote="awmid"
+           revision="lineage-23.2"
+           groups="qcom">
+    <linkfile src="os_pickup_aosp.mk" dest="hardware/qcom/Android.mk" />
+    <linkfile src="os_pickup_sepolicy_vndr.mk" dest="device/qcom/sepolicy_vndr/SEPolicy.mk" />
+    <linkfile src="os_pickup_qssi.bp" dest="hardware/qcom-caf/msm8953/Android.bp" />
+    <linkfile src="os_pickup.bp" dest="hardware/qcom-caf/msm8998/Android.bp" />
+    <linkfile src="os_pickup_qssi.bp" dest="hardware/qcom-caf/sdm660/Android.bp" />
+    <linkfile src="os_pickup_qssi.bp" dest="hardware/qcom-caf/sdm845/Android.bp" />
+    <linkfile src="os_pickup_qssi.bp" dest="hardware/qcom-caf/sm8150/Android.bp" />
+    <linkfile src="os_pickup_qssi.bp" dest="hardware/qcom-caf/sm8250/Android.bp" />
+    <linkfile src="os_pickup_qssi.bp" dest="hardware/qcom-caf/sm8350/Android.bp" />
+    <linkfile src="os_pickup_qssi.bp" dest="hardware/qcom-caf/sm8450/Android.bp" />
+    <linkfile src="os_pickup_qssi.bp" dest="hardware/qcom-caf/sm8450-6.6/Android.bp" />
+    <linkfile src="os_pickup_qssi.bp" dest="hardware/qcom-caf/sm8550/Android.bp" />
+    <linkfile src="os_pickup_qssi.bp" dest="hardware/qcom-caf/sm8650/Android.bp" />
+    <linkfile src="os_pickup_qssi.bp" dest="hardware/qcom-caf/sm8750/Android.bp" />
+  </project>
+
+  <!--
+    OPTIONAL, disabled: only if the first build/`m selinux_policy` fails with a genfscon syntax error on
+    generic/vendor/canoe/genfs_contexts (Qualcomm's canoe file has one genfscon path without a leading "/").
+    Fix = one-line commit on branch lineage-23.2-caf-sm8750-steppe (made locally in the sepolicy_vndr clone; push it to
+    Awmid/android_device_qcom_sepolicy_vndr first). Needs a repo version whose <remove-project> supports `path`
+    (otherwise use TARGET_SEPOLICY_DIR := sun in BoardConfig.mk instead).
+  <remove-project name="LineageOS/android_device_qcom_sepolicy_vndr" path="device/qcom/sepolicy_vndr/sm8750" />
+  <project path="device/qcom/sepolicy_vndr/sm8750"
+           name="android_device_qcom_sepolicy_vndr"
+           remote="awmid"
+           revision="lineage-23.2-caf-sm8750-steppe"
+           groups="qcom" />
+  -->
+</manifest>
