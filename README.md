@@ -59,7 +59,6 @@ Lineage 23.2 ships no qcom-caf platform for `malabar`. The forked `hardware_qcom
 - **Gralloc flags** `GRALLOC_HANDLE_HAS_RESERVED_SIZE` and `CUSTOM_CONTENT_MD_RESERVED_SIZE` are left at their defaults and need runtime confirmation.
 - **AVB chain key:** after a build, check that the built `vbmeta.img` shows the stock chained key (sha1 starts `85f7b343fdc4`). Vbmeta is built with verification disabled (`--flags 3`) and test keys on purpose.
 - **Ignored scripts:** a few stock scripts are not called by any rc file (dead but harmless). Do not delete them.
-- **SD slot:** the stock fstab has an `sdcard1` entry that is not in this tree. Confirm the device has no SD slot.
 - **Credits:** `LICENSE` is Apache 2.0. Per-file copyright headers and a credits list for the reference trees (Xiaomi `spring` and `peridot`) still need to be written.
 
 ## Before any test boot

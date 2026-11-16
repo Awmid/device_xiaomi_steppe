@@ -98,6 +98,13 @@ BOARD_BOOTCONFIG := \
     androidboot.vendor.qspa=true \
     androidboot.serialconsole=0
 
+# Bring-up only: build with `export STEPPE_PERMISSIVE=true` (needs a userdebug/eng build, user builds ignore it).
+# Same approach as spring, which carried androidboot.selinux=permissive in BOARD_BOOTCONFIG until its real sepolicy landed (f18993a -> 6a6b1a5).
+# Never set this for a build handed to testers or released.
+ifeq ($(STEPPE_PERMISSIVE),true)
+BOARD_BOOTCONFIG += androidboot.selinux=permissive
+endif
+
 # Kernel (prebuilt, lives in device/xiaomi/steppe-kernel = repo device_xiaomi_steppe_kernel;
 # layout mirrors spring-kernel)
 PREBUILT_PATH := device/xiaomi/steppe-kernel
