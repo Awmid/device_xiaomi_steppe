@@ -85,13 +85,18 @@ BOARD_KERNEL_CMDLINE := \
     erofs.reserved_pages=64 \
     bootconfig
 
-# Verified from `adb shell getprop` (ro.boot.*)
+# Verified from `adb shell getprop` (ro.boot.*) and cross-checked against the bootconfig block of the stock vendor_boot.img (OS3.0.313.0)
+# usb.dwc3_msm, hypervisor.protected_vm.supported and vendor.qspa are present in stock vendor_boot's bootconfig.
+# vendor.qspa=true gates init.qcrild.sh and the qspa_vendor.rc imports; the per-subsystem ro.boot.vendor.qspa.* values come from the bootloader.
 BOARD_BOOTCONFIG := \
     androidboot.hardware=qcom \
-    androidboot.usbcontroller=4e00000.dwc3 \
     androidboot.memcg=1 \
-    androidboot.serialconsole=0 \
-    androidboot.load_modules_parallel=true
+    androidboot.usbcontroller=4e00000.dwc3 \
+    androidboot.usb.dwc3_msm=4e00000.hsusb \
+    androidboot.load_modules_parallel=true \
+    androidboot.hypervisor.protected_vm.supported=true \
+    androidboot.vendor.qspa=true \
+    androidboot.serialconsole=0
 
 # Kernel (prebuilt, lives in device/xiaomi/steppe-kernel = repo device_xiaomi_steppe_kernel;
 # layout mirrors spring-kernel)
